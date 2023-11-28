@@ -1,0 +1,4 @@
+{
+  "auth/invalid-email": "Email 주소가 잘못되었습니다.",
+  "auth/missing-password": "비밀번호가 누락되었습니다."
+}
