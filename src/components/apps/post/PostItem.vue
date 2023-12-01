@@ -7,7 +7,7 @@
     </q-item-section>
     <q-item-section>
       <div class="flex items-center">
-        <span>닉네임 &middot; 3일전</span>
+        <span>닉네임 &middot; {{ date.formatDate(createdAt, 'YY/MM/DD HH:mm:ss') }}</span>
         <q-chip class="q-ml-sm" color="primary" text-color="white">
           {{ category }}
         </q-chip>
@@ -61,10 +61,11 @@
 
 <script setup>
 import PostIcon from 'src/components/apps/post/PostIcon.vue';
+import { date } from "quasar";
 
 defineProps({
   id: {
-    type: Number,
+    type: String,
   },
   title: {
     type: String,
@@ -91,7 +92,7 @@ defineProps({
   category: {
     type: String,
   },
-  createTime: {
+  createdAt: {
     type: Date,
   },
   tags: {

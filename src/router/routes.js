@@ -37,6 +37,10 @@ const routes = [
         ]
       },
       {
+        path: 'vueuse',
+        component: () => import('pages/vuruse/index.vue'),
+      },
+      {
         path: '/home',
         component: () => import('pages/home.vue'),
         meta: { width: '600px' },

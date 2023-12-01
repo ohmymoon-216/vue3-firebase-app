@@ -24,10 +24,26 @@ import {ref} from "vue";
 import { useQuasar } from "quasar";
 import { sighUpWithEmail } from 'src/service'
 import { validateRequired, validateEmail, validatePassword, validatePasswordConfirm } from "src/utils/validate-rules";
+import { useAsyncState } from "@vueuse/core";
+import {getErrorMessage} from "src/utils/firebase/error-message";
 
 const emit = defineEmits(['changeView', 'closeDialog']);
 
 const $q = useQuasar();
+
+const {isLoading, execute} = useAsyncState(sighUpWithEmail, null, {
+  immediate: false,
+  onSuccess: () => {
+    $q.notify('가입을 환영합니다.');
+    emit('closeDialog');
+  },
+  onError: (err) => {
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err.code)
+    });
+  }
+});
 
 const form = ref({
   nickname: '',
@@ -37,11 +53,13 @@ const form = ref({
 
 const passwordConfirm = ref('');
 
-const handleSubmit = async () => {
-  await sighUpWithEmail(form.value);
-  $q.notify('가입을 환영합니다.');
-  emit('closeDialog');
-}
+const handleSubmit = () => execute(1000, form.value);
+
+// const handleSubmit = async () => {
+//   await sighUpWithEmail(form.value);
+//   $q.notify('가입을 환영합니다.');
+//   emit('closeDialog');
+// }
 </script>
 
 <style lang="scss" scoped></style>

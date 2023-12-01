@@ -52,12 +52,27 @@ import { useQuasar } from "quasar";
 import {ref} from "vue";
 import DisplayError from "components/DisplayError.vue";
 import {getErrorMessage} from "src/utils/firebase/error-message";
+import { useAsyncState } from "@vueuse/core";
 
 const $q = useQuasar();
 const emit = defineEmits(['changeView', 'closeDialog']);
 
-const isLoading = ref(false);
-const error = ref(null);
+// const isLoading = ref(false);
+// const error = ref(null);
+const {isLoading, error, execute} = useAsyncState(signInWithEmail, null, {
+  immediate: false,
+  throwError: true,
+  onSuccess: () => {
+    $q.notify('환영합니다.');
+    emit('closeDialog');
+  },
+  onError: (err) => {
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err.code)
+    });
+  }
+});
 
 const form = ref({
   email: '',
@@ -69,23 +84,25 @@ const handleSighInGoogle = async () => {
   emit('closeDialog');
 };
 
-const handleSubmit = async () => {
-  try {
-    isLoading.value = true;
-    await signInWithEmail(form.value);
-    $q.notify('환영합니다.');
-    emit('closeDialog');
-  }catch (err){
-    error.value = err;
-    $q.notify({
-      type: 'negative',
-      message: getErrorMessage(err.code)
-    })
-  }finally {
-    isLoading.value = false
-  }
+const handleSubmit = () => execute(1000, form.value);
 
-}
+// const handleSubmit = async () => {
+//   try {
+//     isLoading.value = true;
+//     await signInWithEmail(form.value);
+//     $q.notify('환영합니다.');
+//     emit('closeDialog');
+//   }catch (err){
+//     error.value = err;
+//     $q.notify({
+//       type: 'negative',
+//       message: getErrorMessage(err.code)
+//     })
+//   }finally {
+//     isLoading.value = false
+//   }
+//
+// }
 </script>
 
 <style lang="scss" scoped></style>

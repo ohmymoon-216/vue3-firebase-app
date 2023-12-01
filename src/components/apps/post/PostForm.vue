@@ -1,6 +1,12 @@
 <script setup>
-import {computed, ref} from "vue";
+import {computed, ref, toRef} from "vue";
 import { getCategories } from 'src/service/category.js';
+import TiptabEditor from "pages/components/tiptab/TiptabEditor.vue";
+import { validateRequired } from "src/utils/validate-rules";
+import { useQuasar } from 'quasar';
+import { useTag} from "src/composables/useTag";
+
+const $q = useQuasar();
 
 const props = defineProps({
   title:{
@@ -16,6 +22,10 @@ const props = defineProps({
     type: Array,
     default: () => []
   },
+  loading: {
+    type: Boolean,
+    default: false
+  }
 });
 
 const emit = defineEmits([
@@ -23,6 +33,7 @@ const emit = defineEmits([
   'update:category',
   'update:content',
   'update:tags',
+  'submit'
 ]);
 
 const titleModel = computed({
@@ -42,42 +53,49 @@ const contentModel = computed({
 
 const categories = getCategories();
 
-const tag = ref('');
 
-const removeTag = () => {
-  console.log('removeTag');
-};
+const handleSubmit = () => {
+  if(!contentModel.value){
+    $q.notify('내용을 작성하세요.');
+    return;
+  }
+  emit('submit');
+}
+
+const { addTag, removeTag } = useTag({
+  tags: toRef(props, 'tags'),
+  updateTags: (tags) => emit('update:tags', tags),
+  maxLengthMessage: '태그는 10개 이상 등록할 수 없습니다.'
+});
+
+
 
 </script>
 
 <template>
-  <q-form>
+  <q-form @submit.prevent="handleSubmit">
     <q-card-section class="q-gutter-y-sm">
-      <q-input outlined placeholder="제목" v-model="titleModel" />
-      <q-select v-model="categoryModel" outlined :options="categories" emit-value map-options>
+      <q-input outlined placeholder="제목" v-model="titleModel" :rules="[validateRequired]" hide-bottom-space />
+      <q-select v-model="categoryModel" outlined :options="categories" emit-value map-options :rules="[validateRequired]" hide-bottom-space>
         <template v-if="!categoryModel" #selected>
           <span class="text-grey-7">카테고리를 선택하세요.</span>
         </template>
       </q-select>
-      <q-input
-        type="textarea"
-        v-model="contentModel"
-        outlined
-        placeholder="내용을 작성해주세요~!"
-      />
+      <TiptabEditor v-model="contentModel"  />
       <q-input
         outlined
         placeholder="태그를 입력해주세요~! (입력 후 Enter)"
         prefix="#"
-        v-model="tag"
+        @keypress.enter.prevent="addTag"
       />
-      <q-chip color="teal" outline dense removable @remove="removeTag"
-      >vuejs</q-chip
+      <q-chip v-for="(tag, idx) in tags" :key="idx" color="teal" outline dense removable @remove="removeTag(idx)"
+      >{{ tag }}</q-chip
       >
     </q-card-section>
     <q-card-actions align="right">
       <slot name="actions">
-
+        <q-btn flat label="취소" v-close-popup />
+        <q-btn type="submit" flat label="저장" color="primary" :loading="loading" />
       </slot>
     </q-card-actions>
   </q-form>

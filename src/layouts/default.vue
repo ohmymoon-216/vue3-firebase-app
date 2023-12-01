@@ -8,7 +8,7 @@
           </q-avatar>
           Moon Family
         </q-toolbar-title>
-        <q-btn stretch flat label="Home" to="/home" />
+        <q-btn stretch flat label="Home" to="/" />
         <q-btn
           stretch
           flat

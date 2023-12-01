@@ -4,21 +4,51 @@ import { updateUserProfile, updateUserEmail } from 'src/service';
 import {ref, watchEffect} from "vue";
 import { useAuthStore } from "stores/auth";
 import { useQuasar} from "quasar";
+import { useAsyncState } from "@vueuse/core";
+import {getErrorMessage} from "src/utils/firebase/error-message";
 
 const $q = useQuasar();
 const authStore = useAuthStore();
 const displayName = ref('');
 const email = ref('');
 
-const handleSubmitProfile = async () => {
-  await updateUserProfile(displayName.value);
-  $q.notify('프로필 수정 완료');
-}
+const {isLoading: isLoadingProfile, execute: executeProfile} = useAsyncState(updateUserProfile, null, {
+  immediate: false,
+  onSuccess: () => {
+    $q.notify('프로필 수정 완료');
+  },
+  onError: (err) => {
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err.code)
+    });
+  }
+});
 
-const handleSubmitEmail = async () => {
-  await updateUserEmail(email.value);
-  $q.notify('이메일 수정 완료');
-}
+const {isLoading: isLoadingEmail, execute: executeEmail} = useAsyncState(updateUserEmail, null, {
+  immediate: false,
+  onSuccess: () => {
+    $q.notify('이메일 수정 완료');
+  },
+  onError: (err) => {
+    $q.notify({
+      type: 'negative',
+      message: getErrorMessage(err.code)
+    });
+  }
+});
+
+const handleSubmitProfile = () => executeProfile(0, displayName.value);
+// const handleSubmitProfile = async () => {
+//   await updateUserProfile(displayName.value);
+//   $q.notify('프로필 수정 완료');
+// }
+
+const handleSubmitEmail = () => executeEmail(0, email.value);
+// const handleSubmitEmail = async () => {
+//   await updateUserEmail(email.value);
+//   $q.notify('이메일 수정 완료');
+// }
 
 watchEffect(() => {
   displayName.value = authStore.user?.displayName;
@@ -39,7 +69,7 @@ watchEffect(() => {
         <q-separator />
         <q-card-actions>
           <q-space />
-          <q-btn type="submit" label="저장하기" flat color="primary" />
+          <q-btn type="submit" label="저장하기" flat color="primary" :loading="isLoadingProfile"/>
         </q-card-actions>
       </q-form>
     </BaseCard>
@@ -54,7 +84,7 @@ watchEffect(() => {
         <q-separator />
         <q-card-actions>
           <q-space />
-          <q-btn type="submit" label="저장하기" flat color="primary" />
+          <q-btn type="submit" label="저장하기" flat color="primary" :loading="isLoadingEmail" />
         </q-card-actions>
       </q-form>
     </BaseCard>
