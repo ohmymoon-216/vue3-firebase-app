@@ -21,7 +21,7 @@
             <q-item clickable v-close-popup :to="`/post/edit/${$route.params.id}`">
               <q-item-section>수정하기</q-item-section>
             </q-item>
-            <q-item clickable v-close-popup>
+            <q-item clickable v-close-popup @click="handleDeletePost">
               <q-item-section>삭제하기</q-item-section>
             </q-item>
           </q-list>
@@ -47,16 +47,36 @@
 <script setup>
 import {date} from "quasar";
 import { useAsyncState } from "@vueuse/core";
-import { useRoute } from "vue-router";
+import { useRoute, useRouter } from "vue-router";
+import {useQuasar} from "quasar";
 import {getPost} from "src/service/post";
 import PostIcon from 'src/components/apps/post/PostIcon.vue';
 import BaseCard from 'src/components/base/BaseCard.vue';
 import TiptapViewer from "pages/components/tiptab/TiptapViewer.vue";
+import { deletePost } from "src/service/post";
 
 const route = useRoute();
+const router = useRouter();
+const $q = useQuasar();
+
 const {state: post, error} = useAsyncState(() => getPost(route.params.id), {}, {
   immediate: true
 });
+
+const {execute: executeDeletePost} = useAsyncState(deletePost, null, {
+  immediate: false,
+  onSuccess: () => {
+    $q.notify('삭제 완료!');
+    router.push('/');
+  }
+})
+
+const handleDeletePost = async () => {
+  if(confirm('삭제하시겠어요')===false){
+    return;
+  };
+  await executeDeletePost(0, route.params.id);
+}
 </script>
 
 <style lang="scss" scoped></style>

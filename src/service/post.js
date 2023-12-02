@@ -1,5 +1,5 @@
 import {db} from 'boot/firebase';
-import { doc, query, where, getDocs, addDoc, collection, serverTimestamp, orderBy, getDoc } from 'firebase/firestore';
+import { doc, updateDoc,deleteDoc, query, where, getDocs, addDoc, collection, serverTimestamp, orderBy, getDoc } from 'firebase/firestore';
 
 export async function createPost(data) {
 
@@ -15,20 +15,6 @@ export async function createPost(data) {
 }
 
 export async function getPosts(params) {
-  // const querySnapshot = await getDocs(collection(db, "posts"));
-  // // const posts = [];
-  // // querySnapshot.forEach((docs) => {
-  // //   console.log((docs.id, " => ", docs.data));
-  // //   posts.push(docs.data());
-  // // });
-  // const posts = querySnapshot.docs.map((docs) => {
-  //   const data =  docs.data();
-  //   return {
-  //     ...data,
-  //     id: docs.id,
-  //     createdAt: data.createdAt?.toDate(),
-  //   }
-  // });
 
   const conditions = [];
   if(params?.category) {
@@ -68,4 +54,15 @@ export async function getPost(id) {
     ...data,
     createdAt: data.createdAt?.toDate()
   }
+}
+
+export async function updatePost(id, data) {
+  await updateDoc(doc(db, 'posts', id), {
+    ...data,
+    updateAt: serverTimestamp(),
+  });
+}
+
+export async function deletePost(id) {
+  await deleteDoc(doc(db, 'posts', id));
 }

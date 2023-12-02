@@ -5,6 +5,7 @@
       <section class="col-7">
         <PostHeader v-model:sort="params.sort" />
         <PostList :items="posts" />
+        <q-btn class="full-width q-mt-md" label="더보기" outline @click="loadMore" />
       </section>
       <PostRightBar v-model:tags="params.tags" class="col-3" @open-write-dialog="openWriteDialog" />
     </div>
@@ -69,6 +70,10 @@ const postDialog = ref(false);
 const openWriteDialog = () => {
   postDialog.value = true;
 };
+
+const loadMore = () => {
+
+}
 </script>
 
 <style lang="scss" scoped></style>
